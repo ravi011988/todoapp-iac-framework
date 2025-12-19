@@ -11,7 +11,7 @@ trigger:
 pool: default
 
 stages:
-  - stage: recommit
+  - stage: pre_commit
     displayName: Static Analysis Stage
     pool: default
     jobs:
@@ -71,3 +71,75 @@ stages:
               tflint
             errorActionPreference: 'continue'
             workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
+
+  - stage: cost_stage  
+    dependsOn: pre_commit
+    displayName:  Cost & Impact Assessment Stage
+    jobs:
+      - job: infra_cost
+        displayName: InfraCost
+        steps:
+        - task: PowerShell@2
+          inputs:
+            targetType: 'inline'
+            script: 'infracost breakdown --path=.'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
+
+  - stage: plan
+    displayName: Plan & Review Stage
+    jobs: 
+    - job: TerraformPlan
+      displayName: Terraform Plan
+      pool: default
+      steps: 
+      - task: TerraformTask@5
+        inputs:
+          provider: 'azurerm'
+          command: 'init'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
+          backendServiceArm: 'sp_1'
+          backendAzureRmStorageAccountName: 'stgbackend2025'
+          backendAzureRmContainerName: 'cntbackend2025'
+          backendAzureRmKey: 'dev.terraform.tfstate'
+      - task: TerraformTask@5
+        inputs:
+          provider: 'azurerm'
+          command: 'plan'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
+          environmentServiceNameAzureRM: 'sp_1'
+
+  - stage: approval
+    dependsOn: plan
+    displayName: Approval & Governance Stage
+    jobs:
+    - job: ManualApproval
+      displayName: Manual Approval
+      pool: server
+      steps: 
+      - task: ManualValidation@1
+        inputs:
+          notifyUsers: 'goyalece@gmail.com'
+
+  - stage: apply
+    dependsOn: approval
+    displayName: Deploy / Apply Stage
+    jobs:
+    - job: TerraformApply
+      displayName: Terraform Apply
+      pool: Default
+      steps:
+      - task: TerraformTask@5
+        inputs:
+          provider: 'azurerm'
+          command: 'init'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
+          backendServiceArm: 'sp_1'
+          backendAzureRmStorageAccountName: 'stgbackend2025'
+          backendAzureRmContainerName: 'cntbackend2025'
+          backendAzureRmKey: 'dev.terraform.tfstate'  
+      - task: TerraformTask@5
+        inputs:
+          provider: 'azurerm'
+          command: 'apply'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
+          environmentServiceNameAzureRM: 'sp_1'
