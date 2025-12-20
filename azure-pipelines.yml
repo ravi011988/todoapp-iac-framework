@@ -10,6 +10,10 @@ trigger:
 
 pool: default
 
+variables:
+  WORK_DIR: '$(System.DefaultWorkingDirectory)/environments/dev'
+  ServicePrincipal: 'sp_1'
+
 stages:
   - stage: pre_commit
     displayName: Static Analysis Stage
@@ -23,8 +27,8 @@ stages:
           inputs:
             provider: 'azurerm'
             command: 'init'
-            workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
-            backendServiceArm: 'sp_1'
+            workingDirectory: '$(WORK_DIR)'
+            backendServiceArm: '$(ServicePrincipal)'
             backendAzureRmResourceGroupName: 'rg_backend'
             backendAzureRmStorageAccountName: 'stgbackend2025'
             backendAzureRmContainerName: 'cntbackend2025'
@@ -35,7 +39,7 @@ stages:
           inputs:
             provider: 'azurerm'
             command: 'validate'
-            workingDirectory: '$(System.DefaultWorkingDirectory)//environments/dev'
+            workingDirectory: '$(WORK_DIR)'
 
       - job: terraform_fmt
         displayName: Terraform Fmt
@@ -45,10 +49,10 @@ stages:
           inputs:
             provider: 'azurerm'
             command: 'custom'
-            workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
+            workingDirectory: '$(WORK_DIR)'
             outputTo: 'console'
             customCommand: 'fmt'
-            environmentServiceNameAzureRM: 'sp_1'
+            environmentServiceNameAzureRM: '$(ServicePrincipal)'
 
       - job: tfsec
         displayName: Tfsec scan
@@ -57,7 +61,7 @@ stages:
         - task: tfsec@1
           inputs:
             version: 'v1.26.0'
-            dir: '$(System.DefaultWorkingDirectory)/environments/dev'
+            dir: '$(WORK_DIR)'
 
       - job: tflint
         displayName: TFlint
@@ -72,7 +76,7 @@ stages:
               ls
               tflint
             errorActionPreference: 'continue'
-            workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
+            workingDirectory: '$(WORK_DIR)'
 
   - stage: cost_stage  
     dependsOn: pre_commit
@@ -85,7 +89,7 @@ stages:
           inputs:
             targetType: 'inline'
             script: 'infracost breakdown --path=.'
-            workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
+            workingDirectory: '$(WORK_DIR)'
 
   - stage: plan
     displayName: Plan & Review Stage
@@ -98,8 +102,8 @@ stages:
         inputs:
           provider: 'azurerm'
           command: 'init'
-          workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
-          backendServiceArm: 'sp_1'
+          workingDirectory: '$(WORK_DIR)'
+          backendServiceArm: '$(ServicePrincipal)'
           backendAzureRmStorageAccountName: 'stgbackend2025'
           backendAzureRmContainerName: 'cntbackend2025'
           backendAzureRmKey: 'dev.terraform.tfstate'
@@ -107,8 +111,8 @@ stages:
         inputs:
           provider: 'azurerm'
           command: 'plan'
-          workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
-          environmentServiceNameAzureRM: 'sp_1'
+          workingDirectory: '$(WORK_DIR)'
+          environmentServiceNameAzureRM: '$(ServicePrincipal)'
 
   - stage: approval
     dependsOn: plan
@@ -134,8 +138,8 @@ stages:
         inputs:
           provider: 'azurerm'
           command: 'init'
-          workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
-          backendServiceArm: 'sp_1'
+          workingDirectory: '$(WORK_DIR)'
+          backendServiceArm: '$(ServicePrincipal)'
           backendAzureRmStorageAccountName: 'stgbackend2025'
           backendAzureRmContainerName: 'cntbackend2025'
           backendAzureRmKey: 'dev.terraform.tfstate'  
@@ -143,5 +147,5 @@ stages:
         inputs:
           provider: 'azurerm'
           command: 'apply'
-          workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
-          environmentServiceNameAzureRM: 'sp_1'
+          workingDirectory: '$(WORK_DIR)'
+          environmentServiceNameAzureRM: '$(ServicePrincipal)'
