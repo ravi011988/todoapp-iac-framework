@@ -12,7 +12,7 @@ pool: default
 
 variables:
   WORK_DIR: '$(System.DefaultWorkingDirectory)/environments/dev'
-  ServicePrincipal: 'sp_1'
+  SERVICE_CONNECTION: 'sp_1'
 
 stages:
   - stage: pre_commit
@@ -28,7 +28,7 @@ stages:
             provider: 'azurerm'
             command: 'init'
             workingDirectory: '$(WORK_DIR)'
-            backendServiceArm: '$(ServicePrincipal)'
+            backendServiceArm: '$(SERVICE_CONNECTION)'
             backendAzureRmResourceGroupName: 'rg_backend'
             backendAzureRmStorageAccountName: 'stgbackend2025'
             backendAzureRmContainerName: 'cntbackend2025'
@@ -52,7 +52,7 @@ stages:
             workingDirectory: '$(WORK_DIR)'
             outputTo: 'console'
             customCommand: 'fmt'
-            environmentServiceNameAzureRM: '$(ServicePrincipal)'
+            environmentServiceNameAzureRM: '$(SERVICE_CONNECTION)'
 
       - job: tfsec
         displayName: Tfsec scan
@@ -103,7 +103,7 @@ stages:
           provider: 'azurerm'
           command: 'init'
           workingDirectory: '$(WORK_DIR)'
-          backendServiceArm: '$(ServicePrincipal)'
+          backendServiceArm: '$(SERVICE_CONNECTION)'
           backendAzureRmStorageAccountName: 'stgbackend2025'
           backendAzureRmContainerName: 'cntbackend2025'
           backendAzureRmKey: 'dev.terraform.tfstate'
@@ -112,7 +112,7 @@ stages:
           provider: 'azurerm'
           command: 'plan'
           workingDirectory: '$(WORK_DIR)'
-          environmentServiceNameAzureRM: '$(ServicePrincipal)'
+          environmentServiceNameAzureRM: '$(SERVICE_CONNECTION)'
 
   - stage: approval
     dependsOn: plan
@@ -139,7 +139,7 @@ stages:
           provider: 'azurerm'
           command: 'init'
           workingDirectory: '$(WORK_DIR)'
-          backendServiceArm: '$(ServicePrincipal)'
+          backendServiceArm: '$(SERVICE_CONNECTION)'
           backendAzureRmStorageAccountName: 'stgbackend2025'
           backendAzureRmContainerName: 'cntbackend2025'
           backendAzureRmKey: 'dev.terraform.tfstate'  
@@ -148,4 +148,4 @@ stages:
           provider: 'azurerm'
           command: 'apply'
           workingDirectory: '$(WORK_DIR)'
-          environmentServiceNameAzureRM: '$(ServicePrincipal)'
+          environmentServiceNameAzureRM: '$(SERVICE_CONNECTION)'
