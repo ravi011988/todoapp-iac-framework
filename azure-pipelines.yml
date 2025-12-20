@@ -12,6 +12,7 @@ pool: default
 variables:
   WORK_DIR: '$(System.DefaultWorkingDirectory)/environments/dev'
   SERVICE_CONNECTION: 'sp_1'
+  BACKEND_KEY: 'dev.terraform.tfstate'
 
 stages:
   - stage: pre_commit
@@ -31,7 +32,7 @@ stages:
             backendAzureRmResourceGroupName: 'rg_backend'
             backendAzureRmStorageAccountName: 'stgbackend2025'
             backendAzureRmContainerName: 'cntbackend2025'
-            backendAzureRmKey: 'dev.terraform.tfstate'
+            backendAzureRmKey: '$(BACKEND_KEY)'
 
         - task: TerraformTask@5
           displayName: Terraform validate
@@ -105,7 +106,7 @@ stages:
           backendServiceArm: '$(SERVICE_CONNECTION)'
           backendAzureRmStorageAccountName: 'stgbackend2025'
           backendAzureRmContainerName: 'cntbackend2025'
-          backendAzureRmKey: 'dev.terraform.tfstate'
+          backendAzureRmKey: '$(BACKEND_KEY)'
       - task: TerraformTask@5
         inputs:
           provider: 'azurerm'
@@ -141,7 +142,7 @@ stages:
           backendServiceArm: '$(SERVICE_CONNECTION)'
           backendAzureRmStorageAccountName: 'stgbackend2025'
           backendAzureRmContainerName: 'cntbackend2025'
-          backendAzureRmKey: 'dev.terraform.tfstate'  
+          backendAzureRmKey: '$(BACKEND_KEY)'  
       - task: TerraformTask@5
         inputs:
           provider: 'azurerm'
