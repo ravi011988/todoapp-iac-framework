@@ -5,8 +5,7 @@ trigger:
      - features/*
  paths:
    include:
-     - environments/dev/*
-     - environments/prod/*
+     - environments/dev
 
 pool: default
 
