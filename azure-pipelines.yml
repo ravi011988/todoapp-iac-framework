@@ -78,18 +78,37 @@ stages:
             errorActionPreference: 'continue'
             workingDirectory: '$(WORK_DIR)'
 
-  - stage: cost_stage  
+  - stage: cost_stage
     dependsOn: pre_commit
-    displayName:  Cost & Impact Assessment Stage
+    displayName: Cost & Impact Assessment Stage
     jobs:
-      - job: infra_cost
-        displayName: InfraCost
-        steps:
-        - task: PowerShell@2
-          inputs:
-            targetType: 'inline'
-            script: 'infracost breakdown --path=.'
-            workingDirectory: '$(WORK_DIR)'
+    - job: infra_cost
+      displayName: InfraCost
+      steps:
+      - task: PowerShell@2
+        displayName: Terraform Plan
+        inputs:
+          targetType: inline
+          script: |
+            terraform init
+            terraform plan -out=tfplan.binary -var-file=dev.tfvars
+
+      - task: PowerShell@2
+        displayName: Terraform Show JSON
+        inputs:
+          targetType: inline
+          script: |
+            terraform show -json tfplan.binary > plan.json
+
+      - task: PowerShell@2
+        displayName: Infracost Breakdown
+        env:
+          INFRACOST_API_KEY: $(INFRACOST_API_KEY)
+        inputs:
+          targetType: inline
+          script: |
+            infracost breakdown --path=plan.json --format=table
+
 
   - stage: plan
     displayName: Plan & Review Stage
