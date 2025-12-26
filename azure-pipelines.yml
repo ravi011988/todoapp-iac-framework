@@ -89,6 +89,7 @@ stages:
         displayName: Terraform Plan
         inputs:
           targetType: inline
+          workingDirectory: '$(WORK_DIR)'
           script: |
             terraform init
             terraform plan -out=tfplan.binary -var-file=dev.tfvars
