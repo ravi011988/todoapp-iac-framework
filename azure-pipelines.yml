@@ -90,8 +90,8 @@ stages:
         inputs:
           targetType: inline
           script: |
-            terraform -chdir=$(WORK_DIR) init
-            terraform -chdir=$(WORK_DIR) plan -out=tfplan.binary -var-file=dev.tfvars
+            terraform -chdir="$(WORK_DIR)" init
+            terraform -chdir="$(WORK_DIR)" plan -out=tfplan.binary -var-file=dev.tfvars
 
       - task: PowerShell@2
         displayName: Terraform Show JSON
