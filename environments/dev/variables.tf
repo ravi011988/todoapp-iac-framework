@@ -12,6 +12,9 @@ variable "public_ips" {}
 variable "vms" {}
 variable "sql_server" {}
 variable "sql_db" {}
+variable "kv" {}
+variable "nsg" {}
+
 # variable "subnet_ids" {
 #   type = map(string)
 # }
