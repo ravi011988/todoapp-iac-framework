@@ -8,7 +8,10 @@ variable "vms" {
     pip_name    = string
     vm_name     = string
     size        = string
-    kv_name     = string
+    kv_name     = optional(string)
+    admin_username = string
+    admin_password = string
+    minimum_tls_version  = optional(string)
 
     source_image_reference = object({
       publisher = string

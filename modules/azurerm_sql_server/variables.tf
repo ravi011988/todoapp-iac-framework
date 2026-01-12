@@ -4,8 +4,8 @@ variable "sql_server" {
     rg_name              = string
     location             = string
     version              = string
-    # admin_username       = string
-    # admin_password       = string
+    admin_username       = string
+    admin_password       = string
     minimum_tls_version  = string
 
     tags = optional(map(string))
